@@ -645,23 +645,7 @@ impl SpClient {
         self.get_metadata(ExtensionKind::SHOW_V4, show_uri).await
     }
 
-    /// Fetch Spotify's audio attributes for a track, including BPM and musical key.
-    ///
-    /// Uses the internal audio-attributes endpoint with the session's credentials.
-    /// Service access and track coverage are controlled by Spotify; HTTP errors
-    /// (including unavailable tracks and denied access) are propagated to the caller.
-    ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// # use librespot_core::{Error, Session, SpotifyId};
-    /// # async fn example(session: &Session) -> Result<(), Error> {
-    /// let track_id = SpotifyId::from_base62("4uLU6hMCjMI75M1A2tKUQC")?;
-    /// let features = session.spclient().get_audio_features(&track_id).await?;
-    /// println!("BPM: {}, key: {}, mode: {}", features.tempo, features.key, features.mode);
-    /// # Ok(())
-    /// # }
-    /// ```
+    /// Fetch audio features for a track, including tempo, key and mode.
     pub async fn get_audio_features(&self, track_id: &SpotifyId) -> Result<AudioFeatures, Error> {
         let endpoint = format!(
             "/audio-attributes/v1/audio-features/{}?format=json",
@@ -677,7 +661,6 @@ impl SpClient {
     ///
     /// Results follow the input order, including duplicates. A `None` entry means
     /// Spotify returned `null` for that track. Empty input makes no request.
-    /// If any request or response fails, the entire operation returns an error.
     pub async fn get_audio_features_batch(
         &self,
         track_ids: &[SpotifyId],

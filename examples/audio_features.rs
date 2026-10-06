@@ -1,7 +1,4 @@
 //! Retrieve audio features for one or more tracks.
-//!
-//! Usage: SPOTIFY_ACCESS_TOKEN=... cargo run --example audio_features -- TRACK_ID [TRACK_ID ...]
-//! Obtain a user access token using the OAuth flow in examples/README.md.
 
 use std::env;
 

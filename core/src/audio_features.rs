@@ -1,14 +1,10 @@
-//! Track attributes returned by Spotify's internal audio-attributes service.
-//!
-//! The endpoint is also used by
-//! [spicetify-dj-info](https://github.com/L3-N0X/spicetify-dj-info/blob/main/src/api/metadata.mjs).
+//! Track audio features returned by Spotify.
 
 use serde::{Deserialize, Serialize};
 
 use crate::Error;
 
-/// Audio attributes for a track. These are Spotify's estimates, not values
-/// calculated locally by librespot. Availability depends on Spotify's service.
+/// Spotify's audio features for a track.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct AudioFeatures {
     /// Estimated tempo in beats per minute (BPM).
