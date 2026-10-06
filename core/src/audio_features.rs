@@ -1,4 +1,7 @@
 //! Track attributes returned by Spotify's internal audio-attributes service.
+//!
+//! The endpoint is also used by
+//! [spicetify-dj-info](https://github.com/L3-N0X/spicetify-dj-info/blob/main/src/api/metadata.mjs).
 
 use serde::{Deserialize, Serialize};
 
@@ -34,7 +37,9 @@ pub struct AudioFeatures {
     pub liveness: Option<f64>,
     /// Base62 track ID, when supplied by the service.
     pub id: Option<String>,
+    /// Spotify track URI, when supplied by the service.
     pub uri: Option<String>,
+    /// Track duration in milliseconds.
     pub duration_ms: Option<u32>,
 }
 

@@ -1,3 +1,8 @@
+//! Retrieve audio features for one or more tracks.
+//!
+//! Usage: SPOTIFY_ACCESS_TOKEN=... cargo run --example audio_features -- TRACK_ID [TRACK_ID ...]
+//! Obtain a user access token using the OAuth flow in examples/README.md.
+
 use std::env;
 
 use librespot::core::{Error, Session, SessionConfig, SpotifyId, authentication::Credentials};
@@ -25,10 +30,10 @@ async fn main() -> Result<(), Error> {
 
     if ids.len() == 1 {
         let features = session.spclient().get_audio_features(&ids[0]).await?;
-        println!("{}", serde_json::to_string_pretty(&features)?);
+        println!("{features:#?}");
     } else {
         let features = session.spclient().get_audio_features_batch(&ids).await?;
-        println!("{}", serde_json::to_string_pretty(&features)?);
+        println!("{features:#?}");
     }
     Ok(())
 }

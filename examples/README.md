@@ -34,26 +34,3 @@ example to play a song -- the second argument is the URI of the track to play.
 ```
 cargo run --example play "$ACCESS_TOKEN" 2WUy2Uywcj5cP0IXQagO3z
 ```
-
-### Track audio features (BPM and key)
-
-With an authenticated Premium session, call
-`session.spclient().get_audio_features(&track_id).await?` to retrieve an
-`AudioFeatures` value, or `get_audio_features_batch(&track_ids)` for multiple
-tracks. Batch calls split input into groups of 100 and preserve `null` results as
-`None`. Tempo is in BPM; key uses pitch classes (C = 0 through B = 11, -1 for
-unknown); mode is 0 for minor or 1 for major. Other attributes are optional.
-
-The `audio_features` example reads an access token from the environment and
-accepts one or more base62 track IDs:
-
-```sh
-SPOTIFY_ACCESS_TOKEN="$ACCESS_TOKEN" cargo run --example audio_features -- 2WUy2Uywcj5cP0IXQagO3z
-```
-
-Use the OAuth flow described below to obtain a user access token. This uses
-Spotify's internal `/audio-attributes/v1/audio-features` service, as used by
-[spicetify-dj-info](https://github.com/L3-N0X/spicetify-dj-info/blob/main/src/api/metadata.mjs); availability and permissions may change independently of
-librespot. Request errors are returned to the caller; no values are estimated
-locally. See the feature request:
-https://github.com/librespot-org/librespot/discussions/1780.

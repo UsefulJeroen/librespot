@@ -650,6 +650,18 @@ impl SpClient {
     /// Uses the internal audio-attributes endpoint with the session's credentials.
     /// Service access and track coverage are controlled by Spotify; HTTP errors
     /// (including unavailable tracks and denied access) are propagated to the caller.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use librespot_core::{Error, Session, SpotifyId};
+    /// # async fn example(session: &Session) -> Result<(), Error> {
+    /// let track_id = SpotifyId::from_base62("4uLU6hMCjMI75M1A2tKUQC")?;
+    /// let features = session.spclient().get_audio_features(&track_id).await?;
+    /// println!("BPM: {}, key: {}, mode: {}", features.tempo, features.key, features.mode);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub async fn get_audio_features(&self, track_id: &SpotifyId) -> Result<AudioFeatures, Error> {
         let endpoint = format!(
             "/audio-attributes/v1/audio-features/{}?format=json",
