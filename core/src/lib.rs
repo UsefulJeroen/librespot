@@ -7,6 +7,7 @@ use librespot_protocol as protocol;
 mod component;
 
 pub mod apresolve;
+pub mod audio_features;
 pub mod audio_key;
 pub mod authentication;
 pub mod cache;
@@ -38,6 +39,7 @@ pub mod token;
 pub mod util;
 pub mod version;
 
+pub use audio_features::AudioFeatures;
 pub use config::SessionConfig;
 pub use error::Error;
 pub use file_id::FileId;

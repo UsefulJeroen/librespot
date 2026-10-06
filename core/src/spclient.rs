@@ -7,6 +7,7 @@ use crate::config::{OS, os_version};
 use crate::{
     Error, FileId, SpotifyId, SpotifyUri,
     apresolve::SocketAddress,
+    audio_features::{AudioFeatures, parse_batch},
     config::SessionConfig,
     dealer::protocol::TransferOptions,
     error::ErrorKind,
@@ -644,6 +645,47 @@ impl SpClient {
         self.get_metadata(ExtensionKind::SHOW_V4, show_uri).await
     }
 
+    /// Fetch Spotify's audio attributes for a track, including BPM and musical key.
+    ///
+    /// Uses the internal audio-attributes endpoint with the session's credentials.
+    /// Service access and track coverage are controlled by Spotify; HTTP errors
+    /// (including unavailable tracks and denied access) are propagated to the caller.
+    pub async fn get_audio_features(&self, track_id: &SpotifyId) -> Result<AudioFeatures, Error> {
+        let endpoint = format!(
+            "/audio-attributes/v1/audio-features/{}?format=json",
+            track_id.to_base62()
+        );
+        let body = self
+            .request_as_json(&Method::GET, &endpoint, None, None)
+            .await?;
+        Ok(serde_json::from_slice(&body)?)
+    }
+
+    /// Fetch audio attributes in batches of at most 100 tracks per request.
+    ///
+    /// Results follow the input order, including duplicates. A `None` entry means
+    /// Spotify returned `null` for that track. Empty input makes no request.
+    /// If any request or response fails, the entire operation returns an error.
+    pub async fn get_audio_features_batch(
+        &self,
+        track_ids: &[SpotifyId],
+    ) -> Result<Vec<Option<AudioFeatures>>, Error> {
+        let mut features = Vec::with_capacity(track_ids.len());
+        for chunk in track_ids.chunks(100) {
+            let ids = chunk
+                .iter()
+                .map(SpotifyId::to_base62)
+                .collect::<Vec<_>>()
+                .join(",");
+            let endpoint = format!("/audio-attributes/v1/audio-features?ids={ids}");
+            let body = self
+                .request_as_json(&Method::GET, &endpoint, None, None)
+                .await?;
+            features.extend(parse_batch(&body, chunk.len())?);
+        }
+        Ok(features)
+    }
+
     pub async fn get_lyrics(&self, track_id: &SpotifyId) -> SpClientResult {
         let endpoint = format!("/color-lyrics/v2/track/{}", track_id.to_base62());
 
@@ -956,5 +998,21 @@ impl SpClient {
             &NO_METRICS_AND_SALT,
         )
         .await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{Session, SessionConfig};
+
+    #[tokio::test]
+    async fn empty_audio_features_batch_needs_no_authenticated_session() {
+        let session = Session::new(SessionConfig::default(), None);
+        let features = session
+            .spclient()
+            .get_audio_features_batch(&[])
+            .await
+            .unwrap();
+        assert!(features.is_empty());
     }
 }
